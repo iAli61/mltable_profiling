@@ -8,3 +8,4 @@ dependencies:
       - idx2numpy
       - pillow
       - PyYAML
+      - tensorboard_plugin_profile
