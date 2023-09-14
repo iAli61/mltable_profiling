@@ -1,0 +1,13 @@
+$schema: https://azuremlschemas.azureedge.net/latest/data.schema.json
+
+# path must point to **folder** containing MLTable artifact (MLTable file + data
+# Supported paths include:
+# local: ./<path>
+# blob:  wasbs://<containername>@<accountname>.blob.core.windows.net/<path>/
+# ADLS gen2: abfss://<file_system>@<account_name>.dfs.core.windows.net/<path>/
+# Datastore: azureml://datastores/<data_store_name>/paths/<path>
+
+type: mltable
+name: multistacc_mltable_validation
+description: test mltable
+path: .

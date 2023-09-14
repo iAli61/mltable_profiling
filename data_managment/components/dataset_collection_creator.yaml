@@ -1,0 +1,16 @@
+$schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
+name: register_model
+display_name: Register Model
+version: 1
+type: command
+inputs:
+  measurement_input_paths:
+    type: string
+  label_input_paths:
+    type: string
+code: ./src/
+environment: azureml:AzureML-sklearn-0.24-ubuntu18.04-py37-cpu:1
+command: >-
+  python register.py
+  --model_input_path ${{inputs.model_input_path}}
+  --model_base_name ${{inputs.model_base_name}}

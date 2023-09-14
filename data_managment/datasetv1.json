@@ -1,0 +1,6 @@
+{
+    "metadata": "azureml:dataset:Metadata:1.0.0",
+    "imagesdataset": "azureml:dataset:ImageFolderDataset:1.0.0",
+    "labeldataset": "azureml:dataset:LabelFolderDataset:1.0.0",
+    "lidar": "azureml:dataset:LidarFolderDataset:1.0.0"
+}

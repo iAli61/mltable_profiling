@@ -109,7 +109,7 @@ class ImageAndMaskHelper:
 
     def __len__(self):
         return len(self.image_masks_pairs)
-
+ 
 
 class ImageAndMaskSequenceDataset(ImageAndMaskHelper):
     """Creates a tensorflow.data.Dataset out of a list of images/masks"""

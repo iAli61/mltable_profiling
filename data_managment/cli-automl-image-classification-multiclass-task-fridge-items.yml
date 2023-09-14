@@ -1,0 +1,47 @@
+$schema: https://azuremlsdk2.blob.core.windows.net/preview/0.0.1/autoMLJob.schema.json
+
+type: automl
+
+experiment_name: dpv2-cli-automl-image-classification-experiment
+description: A multi-class Image classification job using fridge items dataset
+
+compute: azureml:gpu-k80
+
+task: image_classification
+log_verbosity: debug
+primary_metric: accuracy
+
+target_column_name: label
+training_data:
+  # Update the path, if prepare_data.py is using data_path other than "./data"
+  path: azureml:multistacc_mltable_train:2
+  type: mltable
+validation_data:
+  # Update the path, if prepare_data.py is using data_path other than "./data"
+  path: azureml:multistacc_mltable_validation:2
+  type: mltable
+
+limits:
+  timeout_minutes: 180
+  max_trials: 40
+
+training_parameters:
+  early_stopping: True
+  evaluation_frequency: 1
+
+sweep:
+  sampling_algorithm: random
+  early_termination:
+    type: bandit
+    evaluation_interval: 2
+    slack_factor: 0.2
+    delay_evaluation: 6
+
+search_space:
+  - model_name:
+      type: choice
+      values: [vitb16r224, vits16r224]
+
+  - model_name:
+      type: choice
+      values: [seresnext, resnet50]

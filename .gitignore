@@ -1,0 +1,5 @@
+*.jpg
+*.csv
+data_managment/MLtableBuilder/mltable/*
+data_managment/MLtableBuilder/mltable_multitask/*
+tensorflow-image-segmentation/ds/*

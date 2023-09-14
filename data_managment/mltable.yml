@@ -1,0 +1,11 @@
+$schema:  https://azuremlschemas.azureedge.net/latest/MLTable.schema.json
+
+
+type: mltable
+paths: 
+  - file: ./datasetv1.json
+transformations:
+  - read_json_lines:
+        encoding: utf8
+        invalid_lines: drop
+        include_path_column: false

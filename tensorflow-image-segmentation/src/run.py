@@ -53,7 +53,7 @@ def run(args):
 
     # sets cuda and distributed config
     training_handler.setup_config(args)
-
+ 
     # DATA
     with LogTimeBlock("build_image_datasets", enabled=True), LogDiskIOBlock(
         "build_image_datasets", enabled=True
