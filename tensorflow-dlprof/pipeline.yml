@@ -69,8 +69,8 @@ jobs:
 
       # oxford pets specifics
       images_type: "jpg"
-      images_filename_pattern: "(.*)\\.jpg"
-      masks_filename_pattern: "(.*)\\.png"
+      images_filename_pattern: '\(\.\*\)\\.jpg'
+      masks_filename_pattern: '\(\.\*\)\\.png'
       num_classes: 3
 
       # data loading
@@ -100,9 +100,11 @@ jobs:
             type: uri_folder
         trained_model: # Path to the final model
             type: uri_folder
+        dlprof: # Path to the dlprof output
+            type: uri_folder
 
     command: >-
-        dlprof python run.py 
+        dlprof --mode tensorflow2 --output_path ${{outputs.dlprof}} python run.py 
         --train_images ${{inputs.images_and_annotations}}/images
         --train_masks ${{inputs.images_and_annotations}}/annotations/trimaps
         --test_images ${{inputs.images_and_annotations}}/images
@@ -124,6 +126,6 @@ jobs:
         --checkpoints ${{outputs.checkpoints}}
         --distributed_strategy ${{inputs.distributed_strategy}}
         --distributed_backend ${{inputs.distributed_backend}}
-        --enable_profiling ${{inputs.enable_profiling}}
+        --enable_profiling ${{inputs.enable_profiling}} 
 
 # </jobs>

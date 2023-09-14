@@ -4,3 +4,4 @@ data_managment/MLtableBuilder/mltable/*
 data_managment/MLtableBuilder/mltable_multitask/*
 ds/*
 tensorflow-image-segmentation/logs/*
+tensorflow-dlprof/dlprof/*
