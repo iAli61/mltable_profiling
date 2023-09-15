@@ -104,7 +104,9 @@ jobs:
             type: uri_folder
 
     command: >-
-        dlprof --mode tensorflow2 --output_path ${{outputs.dlprof}} python run.py 
+        dlprof --mode tensorflow2 
+        --output_path ${{outputs.dlprof}} 
+        --reports=detail --formats=csv,json python run.py 
         --train_images ${{inputs.images_and_annotations}}/images
         --train_masks ${{inputs.images_and_annotations}}/annotations/trimaps
         --test_images ${{inputs.images_and_annotations}}/images
