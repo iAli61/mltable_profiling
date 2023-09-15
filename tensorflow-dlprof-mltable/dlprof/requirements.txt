@@ -1,0 +1,15 @@
+nvidia-pyindex
+nvidia-dlprof
+nvidia-dlprofviewer
+
+# dlprof viewer
+example:
+```
+dlprofviewer base/dlprof_dldb.sqlite 
+```
+
+using NGC Docker container:
+
+```
+docker run --rm --gpus=1 --shm-size=1g --ulimit memlock=-1 --ulimit stack=67108864 -it -p8000:8000 -v ./:/data nvcr.io/nvidia/pytorch:21.07-py3
+ ```

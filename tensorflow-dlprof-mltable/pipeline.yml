@@ -1,37 +1,21 @@
 $schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
 type: pipeline
 
-experiment_name: "tensorflow_unet_pets_dlprof"
+experiment_name: "mltable_pets"
 
 # <jobs>
 settings:
   default_datastore: azureml:workspaceblobstore
   continue_on_step_failure: true
 
+inputs:
+  images_and_annotations:
+    type: mltable
+    path: azureml:pet_images-mltable:1
+
+
 jobs:
-  prepare_data:
-    type: command
-    command: |
-      tar xvfm ${{inputs.images_archive}} --no-same-owner -C ${{outputs.images_and_annotations}} &&
-      tar xvfm ${{inputs.annotations_archive}} --no-same-owner -C ${{outputs.images_and_annotations}}
-
-    inputs:
-      images_archive:
-        type: uri_file
-        path: https://www.robots.ox.ac.uk/~vgg/data/pets/data/images.tar.gz
-      annotations_archive:
-        type: uri_file
-        path: https://www.robots.ox.ac.uk/~vgg/data/pets/data/annotations.tar.gz
-
-    outputs:
-      images_and_annotations:
-        type: uri_folder
-        mode: upload
-
-    environment: azureml:AzureML-sklearn-1.0-ubuntu20.04-py38-cpu@latest
-
-    compute: azureml:cpu-cluster
-
+  
   train:
     type: command
     code: ./src/
@@ -104,9 +88,7 @@ jobs:
             type: uri_folder
 
     command: >-
-        dlprof --mode tensorflow2 
-        --output_path ${{outputs.dlprof}} 
-        --reports=all --formats=csv,json python run.py 
+        python run.py 
         --train_images ${{inputs.images_and_annotations}}/images
         --train_masks ${{inputs.images_and_annotations}}/annotations/trimaps
         --test_images ${{inputs.images_and_annotations}}/images
