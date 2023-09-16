@@ -11,7 +11,10 @@ RUN python -m pip install   azureml-defaults \
                             psutil \
                             pynvml \
                             tensorboard_plugin_profile \
-                            mltable
+                            mltable>=1.2.0 \
+                            azureml-dataset-runtime[pandas,fuse] \
+                            azureml-telemetry \
+                            pandas
 
 RUN python -m pip install nvidia-pyindex 
 RUN python -m pip install nvidia-dlprof

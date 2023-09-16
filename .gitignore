@@ -2,6 +2,6 @@
 *.csv
 data_managment/MLtableBuilder/mltable/*
 data_managment/MLtableBuilder/mltable_multitask/*
-ds/*
+ds/data/*
 tensorflow-image-segmentation/logs/*
 tensorflow-dlprof/dlprof/*

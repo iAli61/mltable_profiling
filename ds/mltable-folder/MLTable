@@ -1,0 +1,6 @@
+paths:
+  - file: ./image_mask.jsonl
+transformations:
+  - read_json_lines:
+        encoding: utf8
+        invalid_lines: error
