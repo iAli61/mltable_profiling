@@ -14,7 +14,8 @@ RUN python -m pip install   azureml-defaults \
                             mltable>=1.2.0 \
                             azureml-dataset-runtime[pandas,fuse] \
                             azureml-telemetry \
-                            pandas
+                            pandas \
+                            cloudpickle
 
 RUN python -m pip install nvidia-pyindex 
 RUN python -m pip install nvidia-dlprof
