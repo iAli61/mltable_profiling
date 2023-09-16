@@ -11,7 +11,8 @@ settings:
 inputs:
   images_and_annotations:
     type: mltable
-    path: azureml:pet_images-mltable:1
+    path: azureml:mltable_pet:1
+    mode: eval_download
 
 
 jobs:
@@ -49,12 +50,10 @@ jobs:
 
     inputs:
       # data inputs
-      images_and_annotations: ${{parent.jobs.prepare_data.outputs.images_and_annotations}}
+      images_and_annotations_ds: ${{parent.inputs.images_and_annotations}}
 
       # oxford pets specifics
       images_type: "jpg"
-      images_filename_pattern: '\(\.\*\)\\.jpg'
-      masks_filename_pattern: '\(\.\*\)\\.png'
       num_classes: 3
 
       # data loading
@@ -89,12 +88,8 @@ jobs:
 
     command: >-
         python run.py 
-        --train_images ${{inputs.images_and_annotations}}/images
-        --train_masks ${{inputs.images_and_annotations}}/annotations/trimaps
-        --test_images ${{inputs.images_and_annotations}}/images
-        --test_masks ${{inputs.images_and_annotations}}/annotations/trimaps
-        --images_filename_pattern "${{inputs.images_filename_pattern}}"
-        --masks_filename_pattern "${{inputs.masks_filename_pattern}}"
+        --train_ds ${{inputs.images_and_annotations_ds}}
+        --test_ds ${{inputs.images_and_annotations_ds}}
         --batch_size ${{inputs.batch_size}}
         --num_workers ${{inputs.num_workers}}
         --prefetch_factor ${{inputs.prefetch_factor}}

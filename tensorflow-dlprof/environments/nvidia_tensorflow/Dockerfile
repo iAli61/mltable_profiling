@@ -10,7 +10,8 @@ RUN python -m pip install   azureml-defaults \
                             azureml-mlflow \
                             psutil \
                             pynvml \
-                            tensorboard_plugin_profile 
+                            tensorboard_plugin_profile \
+                            mltable
 
 RUN python -m pip install nvidia-pyindex 
 RUN python -m pip install nvidia-dlprof

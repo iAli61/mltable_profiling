@@ -19,6 +19,8 @@ import logging
 import argparse
 from distutils.util import strtobool
 
+import mltable
+
 import mlflow
 
 # tensorflow imports
@@ -63,12 +65,11 @@ def run(args):
     with LogTimeBlock("build_image_datasets", enabled=True), LogDiskIOBlock(
         "build_image_datasets", enabled=True
     ):
+        
+        
         train_dataset_helper = ImageAndMaskSequenceDataset(
-            images_dir=args.train_images,
-            masks_dir=args.train_masks,
-            images_filename_pattern=args.images_filename_pattern,
-            masks_filename_pattern=args.masks_filename_pattern,
-            images_type=args.images_type,
+            dataset=args.train_ds,
+            images_type="png",  # masks need to be in png
         )
 
         # the helper returns a dataset containing paths to images
@@ -78,10 +79,7 @@ def run(args):
         )
 
         test_dataset_helper = ImageAndMaskSequenceDataset(
-            images_dir=args.test_images,
-            masks_dir=args.test_masks,
-            images_filename_pattern=args.images_filename_pattern,
-            masks_filename_pattern=args.masks_filename_pattern,
+            dataset=args.test_ds,
             images_type="png",  # masks need to be in png
         )
 
@@ -168,17 +166,14 @@ def build_arguments_parser(parser: argparse.ArgumentParser = None):
 
     group = parser.add_argument_group("Training Inputs")
     group.add_argument(
-        "--train_images",
-        type=str,
+        "--train_ds",
         required=True,
-        help="Path to folder containing training images",
+        help="mltable for training images and masks",
     )
     group.add_argument(
-        "--images_filename_pattern",
-        type=str,
-        required=False,
-        default="(.*)\\.jpg",
-        help="Regex used to find and match images with masks (matched on group(1))",
+        "--test_ds",
+        required=True,
+        help="mltable for test images and masks",
     )
     group.add_argument(
         "--images_type",
@@ -188,32 +183,7 @@ def build_arguments_parser(parser: argparse.ArgumentParser = None):
         default="png",
         help="png (default) or jpg",
     )
-    group.add_argument(
-        "--train_masks",
-        type=str,
-        required=True,
-        help="path to folder containing segmentation masks",
-    )
-    group.add_argument(
-        "--masks_filename_pattern",
-        type=str,
-        required=False,
-        default="(.*)\\.png",
-        help="Regex used to find and match images with masks (matched on group(1))",
-    )
-    group.add_argument(
-        "--test_images",
-        type=str,
-        required=True,
-        help="Path to folder containing testing images",
-    )
-    group.add_argument(
-        "--test_masks",
-        type=str,
-        required=True,
-        help="path to folder containing segmentation masks",
-    )
-
+    
     group = parser.add_argument_group("Training Outputs")
     group.add_argument(
         "--model_output",
