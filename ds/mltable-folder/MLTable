@@ -1,6 +1,15 @@
 paths:
-  - file: ./image_mask.jsonl
+- file: image_mask.jsonl
 transformations:
-  - read_json_lines:
-        encoding: utf8
-        invalid_lines: error
+- read_json_lines:
+    encoding: utf8
+    include_path_column: false
+    invalid_lines: error
+    partition_size: 20971520
+    path_column: Path
+- convert_column_types:
+  - column_type: stream_info
+    columns: image_url
+  - column_type: stream_info
+    columns: mask_url
+type: mltable

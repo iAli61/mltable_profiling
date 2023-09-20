@@ -68,7 +68,8 @@ def run(args):
         
         
         train_dataset_helper = ImageAndMaskSequenceDataset(
-            dataset=args.train_ds,
+            image_ds=args.image_ds,
+            mask_ds=args.mask_ds,
             images_type="png",  # masks need to be in png
         )
 
@@ -79,7 +80,8 @@ def run(args):
         )
 
         test_dataset_helper = ImageAndMaskSequenceDataset(
-            dataset=args.test_ds,
+            image_ds=args.image_ds,
+            mask_ds=args.mask_ds,
             images_type="png",  # masks need to be in png
         )
 
@@ -166,14 +168,14 @@ def build_arguments_parser(parser: argparse.ArgumentParser = None):
 
     group = parser.add_argument_group("Training Inputs")
     group.add_argument(
-        "--train_ds",
+        "--image_ds",
         required=True,
-        help="mltable for training images and masks",
+        help="mltable for training images",
     )
     group.add_argument(
-        "--test_ds",
+        "--mask_ds",
         required=True,
-        help="mltable for test images and masks",
+        help="mltable for test masks",
     )
     group.add_argument(
         "--images_type",
@@ -346,6 +348,10 @@ def main(cli_args=None):
     )
     console_handler.setFormatter(formatter)
     logger.addHandler(console_handler)
+
+    # print environment variables
+    for key, value in os.environ.items():
+        logger.info(f"[ENV] {key}={value}")
 
     tf.get_logger().setLevel("INFO")
 

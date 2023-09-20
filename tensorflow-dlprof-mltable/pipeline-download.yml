@@ -1,0 +1,122 @@
+$schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
+type: pipeline
+
+experiment_name: "mltable_pets_dlprof_download"
+
+# <jobs>
+settings:
+  default_datastore: azureml:workspaceblobstore
+  continue_on_step_failure: true
+
+inputs:
+  images:
+    type: mltable
+    path: azureml:pets-mltable-images:1
+    mode: eval_download
+  annotations:
+    type: mltable
+    path: azureml:pets-mltable-masks:2
+    mode: eval_download
+
+
+jobs:
+  
+  train:
+    type: command
+    code: ./src/
+
+    compute: azureml:gpu-cluster
+    resources:
+      instance_count: 1 # number of nodes
+    distribution:
+      # NOTE: using type:tensorflow will use all the right env variables (ex: TF_CONFIG)
+      type: tensorflow
+      worker_count: 1 # needs to match instance_count (!)
+
+    # environment: azureml:AzureML-tensorflow-2.7-ubuntu20.04-py38-cuda11-gpu@latest
+    # uncomment below to use custom environment
+    environment:
+      build: 
+        path: ./environments/nvidia_tensorflow/
+
+    # NOTE: set env var if needed
+    environment_variables:
+      # adjusts the level of info from NCCL tests
+      NCCL_DEBUG: "INFO"
+      NCCL_DEBUG_SUBSYS: "GRAPH,INIT,ENV"
+
+      # relaxed Ordering can greatly help the performance of Infiniband networks in virtualized environments.
+      NCCL_IB_PCI_RELAXED_ORDERING: "1"
+      CUDA_DEVICE_ORDER: "PCI_BUS_ID"
+      NCCL_SOCKET_IFNAME: "eth0"
+
+      # PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION: python
+
+      # eval_download env vars
+      AZUREML_DATASET_HTTP_RETRY_COUNT: "10"
+      # RSLEX_DOWNLOADER_THREADS: "64"
+
+    inputs:
+      # data inputs
+      images_ds: ${{parent.inputs.images}}
+      annotations_ds: ${{parent.inputs.annotations}}
+
+      # oxford pets specifics
+      images_type: "jpg"
+      num_classes: 3
+
+      # data loading
+      batch_size: 64
+      num_workers: 5 # int or -1 (AUTOTUNE)
+      prefetch_factor: 8 # int or -1 (AUTOTUNE)
+      cache: "none" # "none" or "memory"
+
+      # model
+      model_arch: "unet"
+      model_input_size: 160
+
+      # training
+      num_epochs: 1
+      optimizer: "rmsprop"
+      loss: "sparse_categorical_crossentropy"
+
+      # distributed settings
+      enable_profiling: True
+      disable_cuda: False # to force disabling CUDA/GPU
+      num_gpus: -1 # put n>=0 to artificially limit number of gpus
+      distributed_strategy: "auto" # "auto" (recommended)
+      distributed_backend: "nccl" # "auto", "ring" or "nccl" (recommended)
+
+    outputs:
+        checkpoints: # Path to export checkpoints
+            type: uri_folder
+        trained_model: # Path to the final model
+            type: uri_folder
+        dlprof: # Path to the dlprof output
+            type: uri_folder
+
+    command: >-
+        dlprof --mode tensorflow2 
+        --output_path ${{outputs.dlprof}} 
+        --reports=all --formats=csv,json 
+        python run.py 
+        --image_ds ${{inputs.images_ds}}
+        --mask_ds ${{inputs.annotations_ds}}
+        --batch_size ${{inputs.batch_size}}
+        --num_workers ${{inputs.num_workers}}
+        --prefetch_factor ${{inputs.prefetch_factor}}
+        --cache ${{inputs.cache}}
+        --model_arch ${{inputs.model_arch}}
+        --num_classes ${{inputs.num_classes}}
+        --model_input_size ${{inputs.model_input_size}}
+        --num_epochs ${{inputs.num_epochs}}
+        --optimizer ${{inputs.optimizer}}
+        --loss ${{inputs.loss}}
+        --num_gpus ${{inputs.num_gpus}}
+        --model_output ${{outputs.trained_model}}
+        --checkpoints ${{outputs.checkpoints}}
+        --distributed_strategy ${{inputs.distributed_strategy}}
+        --distributed_backend ${{inputs.distributed_backend}}
+        --enable_profiling ${{inputs.enable_profiling}} 
+
+# </jobs>

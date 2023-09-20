@@ -5,15 +5,18 @@
 This script contains methods to hangle inputs for tensorflow model training.
 """
 
+import glob
 import logging
+import re
 
 import tensorflow
 import mltable
+import os
 
 class ImageAndMaskHelper:
     """Helps locating images and masks for training a segmentation model"""
 
-    def __init__(self, dataset, images_type: str = "png"):
+    def __init__(self, image_ds, mask_ds, images_type: str = "png"):
         """Initialize the helper class.
 
         Args:
@@ -22,13 +25,13 @@ class ImageAndMaskHelper:
         self.logger = logging.getLogger(__name__)
         self.images_type = images_type
         self.image_masks_pairs = []
-        self.images = []
-        self.masks = []
+        self.mask_ds = mask_ds
+        self.image_ds = image_ds
 
         # load mltable
-        tbl = mltable.load(dataset)
-        # load into pandas
-        self.tdf = tbl.to_pandas_dataframe()
+        self.logger.info(f"[IMAGE] Loading MLTable from {image_ds}")
+        self.logger.info(f"[MASK] Loading MLTable from {mask_ds}")
+        
         
 
     def build_pair_list(self):
@@ -37,15 +40,57 @@ class ImageAndMaskHelper:
         Returns:
             image_masks_pairs (List[tuple(str, str)])
         """
-        for index, row in self.tdf.iterrows():
-            image_path = row['image_url']
-            mask_path = row['mask_url']
-            
-            self.images.append(image_path)
-            self.masks.append(mask_path)
-            self.image_masks_pairs.append((image_path, mask_path))
 
-        self.logger.info(f"Finished parsing images/masks paths. Found {len(self.image_masks_pairs)} pairs.")
+        parsing_stats = {
+            "masks_not_matching": 0,
+            "images_not_matching": 0,
+            "images_without_masks": 0,
+        }
+        # search for all masks matching file name pattern
+        masks_filename_pattern = re.compile("(.*)\\.png")
+
+        masks_paths = []
+        for file_path in glob.glob(self.mask_ds + "/**/*", recursive=True):
+            matches = masks_filename_pattern.match(os.path.basename(file_path))
+            if matches:
+                masks_paths.append((matches.group(1), file_path))
+            else:
+                # keep some stats
+                parsing_stats["masks_not_matching"] += 1
+        masks_paths = dict(masks_paths)  # turn list of tuples into a map
+
+        # search for all images matching file name pattern
+        images_filename_pattern = re.compile("(.*)\\.jpg")
+        images_paths = []
+        for file_path in glob.glob(self.image_ds + "/**/*", recursive=True):
+            matches = images_filename_pattern.match(os.path.basename(file_path))
+            if matches:
+                images_paths.append((matches.group(1), file_path))
+            else:
+                # keep some stats
+                parsing_stats["images_not_matching"] += 1
+
+        # now match images and masks
+        self.images = []  # list of images
+        self.masks = []  # list of masks (ordered like self.images)
+        self.image_masks_pairs = []  # list of tuples
+
+        for image_key, image_path in images_paths:
+            if image_key in masks_paths:
+                self.images.append(image_path)
+                self.masks.append(masks_paths[image_key])
+                self.image_masks_pairs.append((image_path, masks_paths[image_key]))
+            else:
+                self.logger.debug(
+                    f"Image {image_path} doesn't have a corresponding mask."
+                )
+                # keep some stats
+                parsing_stats["images_without_masks"] += 1
+
+        parsing_stats["found_pairs"] = len(self.image_masks_pairs)
+
+        self.logger.info(f"Finished parsing images/masks paths: {parsing_stats}")
+
         return self.image_masks_pairs
 
     def __len__(self):

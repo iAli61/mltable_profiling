@@ -1,0 +1,10 @@
+paths:
+- file: azureml://subscriptions/f804f2da-c27b-45ac-bf80-16d4d331776d/resourcegroups/rg-mltable-profiler/workspaces/mlw-mltable-profiler/datastores/workspaceblobstore/paths/mltable-folder/image_mask.jsonl
+transformations:
+- read_json_lines:
+    encoding: utf8
+    include_path_column: false
+    invalid_lines: error
+    partition_size: 20971520
+    path_column: Path
+type: mltable
